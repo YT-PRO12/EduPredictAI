@@ -1,0 +1,39 @@
+{
+    "student_index": 2892,
+    "risk_assessment": {
+        "probability": 0.0771,
+        "probability_percent": 7.71,
+        "risk_level": "LOW"
+    },
+    "detected_conditions": [
+        "no_major_rule_based_issue_detected"
+    ],
+    "interventions": [],
+    "monitoring": {
+        "frequency": "Monthly",
+        "escalation": "Continue routine monitoring and reassess if new risk indicators appear."
+    },
+    "30_day_plan": {
+        "Week 1": [
+            "Review current academic plan"
+        ],
+        "Week 2": [
+            "Routine progress check"
+        ],
+        "Week 3": [
+            "Review emerging issues"
+        ],
+        "Week 4": [
+            "Reassess risk",
+            "Continue routine monitoring"
+        ]
+    },
+    "progress": {
+        "baseline_risk": 0.07714310294271433,
+        "current_risk": 0.54,
+        "intervention_completion": 82,
+        "academic_goal_progress": 70,
+        "last_review": "Day 30"
+    },
+    "next_action": "Risk increased. Review barriers and consider escalation."
+}
