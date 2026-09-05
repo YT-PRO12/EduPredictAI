@@ -37,6 +37,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "http://127.0.0.1:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5174",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -126,21 +128,15 @@ def normalize_student_data(data: dict):
     normalized = {}
 
     for key, value in data.items():
-
         if key in mapping:
-            normalized[
-                mapping[key]
-            ] = value
-
+            normalized[mapping[key]] = value
         else:
             normalized[key] = value
 
     return normalized
 
 
-def get_risk_level(
-    probability: float
-):
+def get_risk_level(probability: float):
     if probability >= 0.60:
         return "HIGH"
 
@@ -150,9 +146,7 @@ def get_risk_level(
     return "LOW"
 
 
-def get_status(
-    risk_level: str
-):
+def get_status(risk_level: str):
     if risk_level == "HIGH":
         return "Needs attention"
 
@@ -163,7 +157,7 @@ def get_status(
 
 
 def get_monitoring_frequency(
-    risk_level: str
+    risk_level: str,
 ):
     if risk_level == "HIGH":
         return "Weekly"
@@ -174,9 +168,7 @@ def get_monitoring_frequency(
     return "Monthly"
 
 
-def normalize_probability(
-    value
-):
+def normalize_probability(value):
     probability = float(value)
 
     if probability > 1:
@@ -184,23 +176,17 @@ def normalize_probability(
 
     return max(
         0.0,
-        min(
-            probability,
-            1.0,
-        ),
+        min(probability, 1.0),
     )
 
 
-def normalize_risk_factors(
-    factors
-):
+def normalize_risk_factors(factors):
     if not factors:
         return []
 
     result = []
 
     for factor in factors:
-
         if not isinstance(
             factor,
             dict,
@@ -228,14 +214,10 @@ def normalize_risk_factors(
             contribution = 0.0
 
         if contribution > 0:
-            direction = (
-                "increases_risk"
-            )
+            direction = "increases_risk"
 
         elif contribution < 0:
-            direction = (
-                "decreases_risk"
-            )
+            direction = "decreases_risk"
 
         else:
             direction = factor.get(
@@ -262,9 +244,30 @@ def normalize_risk_factors(
     return result
 
 
+def fallback_interventions(
+    risk_level: str,
+    student_data: dict,
+):
+    if risk_level == "HIGH":
+        return [
+            "Academic mentoring",
+            "Tuition-support review",
+            "Review scholarship or financial-aid eligibility",
+        ]
+
+    if risk_level == "MEDIUM":
+        return [
+            "Academic progress check-in",
+            "Faculty mentoring",
+        ]
+
+    return [
+        "Routine academic monitoring"
+    ]
+
+
 @app.get("/")
 def root():
-
     return {
         "message":
             "EduPredict AI backend is running",
@@ -279,7 +282,6 @@ def root():
 
 @app.get("/health")
 def health():
-
     return {
         "status":
             "healthy"
@@ -290,19 +292,15 @@ def health():
 def predict(
     student_data: dict = Body(...)
 ):
-
     try:
-
         normalized_data = (
             normalize_student_data(
                 student_data
             )
         )
 
-        probability = (
-            predict_dropout(
-                normalized_data
-            )
+        probability = predict_dropout(
+            normalized_data
         )
 
         probability = (
@@ -311,16 +309,13 @@ def predict(
             )
         )
 
-        risk_level = (
-            get_risk_level(
-                probability
-            )
+        risk_level = get_risk_level(
+            probability
         )
 
         risk_factors = []
 
         try:
-
             risk_factors = (
                 explain_student(
                     model,
@@ -329,7 +324,6 @@ def predict(
             )
 
         except Exception as error:
-
             print(
                 "SHAP ERROR:",
                 repr(error),
@@ -343,8 +337,9 @@ def predict(
             )
         )
 
-        try:
+        interventions = []
 
+        try:
             interventions = (
                 generate_intervention_plan(
                     normalized_data,
@@ -353,9 +348,7 @@ def predict(
             )
 
         except TypeError:
-
             try:
-
                 interventions = (
                     generate_intervention_plan(
                         normalized_data
@@ -363,51 +356,24 @@ def predict(
                 )
 
             except Exception as error:
-
                 print(
                     "INTERVENTION ERROR:",
                     repr(error),
                 )
 
-                interventions = []
-
         except Exception as error:
-
             print(
                 "INTERVENTION ERROR:",
                 repr(error),
             )
 
-            interventions = []
-
         if not interventions:
-
-            if risk_level == "HIGH":
-
-                interventions = [
-                    "Academic mentoring",
-                    "Tuition-support review",
-                    "Review scholarship or financial-aid eligibility",
-                ]
-
-            elif risk_level == "MEDIUM":
-
-                interventions = [
-                    "Academic progress check-in",
-                    "Faculty mentoring",
-                ]
-
-            else:
-
-                interventions = [
-                    "Routine academic monitoring"
-                ]
-
-        monitoring = (
-            get_monitoring_frequency(
-                risk_level
+            interventions = (
+                fallback_interventions(
+                    risk_level,
+                    normalized_data,
+                )
             )
-        )
 
         return {
             "dropout_probability":
@@ -432,11 +398,12 @@ def predict(
                 interventions,
 
             "monitoring":
-                monitoring,
+                get_monitoring_frequency(
+                    risk_level
+                ),
         }
 
     except Exception as error:
-
         print(
             "PREDICTION ERROR:",
             repr(error),
@@ -453,11 +420,9 @@ def predict(
 
 @app.post("/assessments")
 def save_assessment(
-    data: dict = Body(...)
+    data: dict = Body(...),
 ):
-
     try:
-
         assessment_id = data.get(
             "id",
             f"ASSESS-{int(datetime.now().timestamp() * 1000)}",
@@ -479,7 +444,6 @@ def save_assessment(
         )
 
         assessment = {
-
             "id":
                 assessment_id,
 
@@ -490,14 +454,10 @@ def save_assessment(
                 student_name,
 
             "course":
-                data.get(
-                    "course"
-                ),
+                data.get("course"),
 
             "year":
-                data.get(
-                    "year"
-                ),
+                data.get("year"),
 
             "probability":
                 float(
@@ -571,7 +531,6 @@ def save_assessment(
         }
 
     except Exception as error:
-
         return {
             "error":
                 "Could not save assessment.",
@@ -583,58 +542,41 @@ def save_assessment(
 
 @app.get("/assessments")
 def get_assessments():
-
     rows = get_all_assessments()
 
     results = []
 
     for row in rows:
-
         item = dict(row)
 
         try:
-
-            item["risk_factors"] = (
-                json.loads(
-                    item.get(
-                        "risk_factors",
-                        "[]",
-                    )
+            item["risk_factors"] = json.loads(
+                item.get(
+                    "risk_factors",
+                    "[]",
                 )
             )
-
         except Exception:
-
             item["risk_factors"] = []
 
         try:
-
-            item["interventions"] = (
-                json.loads(
-                    item.get(
-                        "interventions",
-                        "[]",
-                    )
+            item["interventions"] = json.loads(
+                item.get(
+                    "interventions",
+                    "[]",
                 )
             )
-
         except Exception:
-
             item["interventions"] = []
 
         try:
-
-            item["student_data"] = (
-                json.loads(
-                    item.get(
-                        "student_data",
-                        "{}",
-                    )
+            item["student_data"] = json.loads(
+                item.get(
+                    "student_data",
+                    "{}",
                 )
             )
-
         except Exception:
-
             item["student_data"] = {}
 
         results.append(item)
@@ -648,7 +590,6 @@ def get_assessments():
 def get_student_history(
     student_id: str,
 ):
-
     rows = get_student_assessments(
         student_id
     )
@@ -656,52 +597,36 @@ def get_student_history(
     results = []
 
     for row in rows:
-
         item = dict(row)
 
         try:
-
-            item["risk_factors"] = (
-                json.loads(
-                    item.get(
-                        "risk_factors",
-                        "[]",
-                    )
+            item["risk_factors"] = json.loads(
+                item.get(
+                    "risk_factors",
+                    "[]",
                 )
             )
-
         except Exception:
-
             item["risk_factors"] = []
 
         try:
-
-            item["interventions"] = (
-                json.loads(
-                    item.get(
-                        "interventions",
-                        "[]",
-                    )
+            item["interventions"] = json.loads(
+                item.get(
+                    "interventions",
+                    "[]",
                 )
             )
-
         except Exception:
-
             item["interventions"] = []
 
         try:
-
-            item["student_data"] = (
-                json.loads(
-                    item.get(
-                        "student_data",
-                        "{}",
-                    )
+            item["student_data"] = json.loads(
+                item.get(
+                    "student_data",
+                    "{}",
                 )
             )
-
         except Exception:
-
             item["student_data"] = {}
 
         results.append(item)
@@ -715,7 +640,6 @@ def get_student_history(
 def get_interventions(
     student_id: str,
 ):
-
     return get_student_interventions(
         student_id
     )
@@ -728,9 +652,7 @@ def save_interventions(
     student_id: str,
     data: list = Body(...),
 ):
-
     try:
-
         save_student_interventions(
             student_id,
             data,
@@ -745,7 +667,6 @@ def save_interventions(
         }
 
     except Exception as error:
-
         return {
             "error":
                 "Could not save interventions.",
