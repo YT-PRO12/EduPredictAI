@@ -1,4 +1,5 @@
 import sqlite3
+from contextlib import closing
 from pathlib import Path
 from datetime import datetime
 
@@ -165,48 +166,45 @@ def save_student_interventions(
     student_id,
     interventions,
 ):
-    connection = get_connection()
+    # The connection context commits or rolls back; closing also releases locks.
+    with closing(get_connection()) as connection, connection:
+        cursor = connection.cursor()
 
-    cursor = connection.cursor()
-
-    cursor.execute(
-        """
-        DELETE FROM interventions
-        WHERE student_id = ?
-        """,
-        (student_id,),
-    )
-
-    for item in interventions:
         cursor.execute(
             """
-            INSERT INTO interventions (
-                student_id,
-                intervention_id,
-                week,
-                title,
-                description,
-                status,
-                updated_at
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            DELETE FROM interventions
+            WHERE student_id = ?
             """,
-            (
-                student_id,
-                int(item["id"]),
-                item.get("week"),
-                item.get("title"),
-                item.get("description"),
-                item.get(
-                    "status",
-                    "pending",
-                ),
-                datetime.now().isoformat(),
-            ),
+            (student_id,),
         )
 
-    connection.commit()
-    connection.close()
+        for item in interventions:
+            cursor.execute(
+                """
+                INSERT INTO interventions (
+                    student_id,
+                    intervention_id,
+                    week,
+                    title,
+                    description,
+                    status,
+                    updated_at
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    student_id,
+                    int(item["id"]),
+                    item.get("week"),
+                    item.get("title"),
+                    item.get("description"),
+                    item.get(
+                        "status",
+                        "pending",
+                    ),
+                    datetime.now().isoformat(),
+                ),
+            )
 
 
 def get_student_interventions(
