@@ -180,9 +180,6 @@ function Assessment() {
         `Student ${finalStudentId.slice(-4)}`;
 
       const assessmentData = {
-        id:
-          `ASSESS-${Date.now()}`,
-
         student_id:
           finalStudentId,
 

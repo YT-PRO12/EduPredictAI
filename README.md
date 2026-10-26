@@ -18,6 +18,15 @@ The platform combines machine learning, an interactive web dashboard, student as
 
 ---
 
+## Assessment creation contract
+
+`POST /assessments` creates a new assessment and returns its server-generated
+`id`. Client-supplied assessment IDs are ignored, including legacy timestamp IDs,
+so simultaneous submissions cannot replace an earlier assessment. Keep the
+returned ID for subsequent references. Existing records and student IDs remain
+unchanged. Retrying a creation request creates another assessment; this endpoint
+does not provide idempotent retries.
+
 ## 🎯 Problem Statement
 
 Educational institutions often identify academically struggling students only after their performance has significantly declined.
