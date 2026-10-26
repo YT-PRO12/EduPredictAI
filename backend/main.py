@@ -1,5 +1,6 @@
 from datetime import datetime
 import json
+from backend.identifiers import new_assessment_id
 
 from fastapi import FastAPI, Body
 from fastapi.middleware.cors import CORSMiddleware
@@ -419,7 +420,7 @@ def save_assessment(
     try:
         assessment_id = data.get(
             "id",
-            f"ASSESS-{int(datetime.now().timestamp() * 1000)}",
+            new_assessment_id(),
         )
 
         student_id = data.get(
