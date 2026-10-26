@@ -1,13 +1,12 @@
 from datetime import datetime
 import json
-from backend.identifiers import new_assessment_id
+from backend.assessments import create_assessment, get_status, get_monitoring_frequency
 
 from fastapi import FastAPI, Body
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.database import (
     initialize_database,
-    insert_assessment,
     get_all_assessments,
     get_student_assessments,
     initialize_interventions_table,
@@ -139,28 +138,6 @@ def get_risk_level(probability: float):
         return "MEDIUM"
 
     return "LOW"
-
-
-def get_status(risk_level: str):
-    if risk_level == "HIGH":
-        return "Needs attention"
-
-    if risk_level == "MEDIUM":
-        return "Monitoring"
-
-    return "Stable"
-
-
-def get_monitoring_frequency(
-    risk_level: str,
-):
-    if risk_level == "HIGH":
-        return "Weekly"
-
-    if risk_level == "MEDIUM":
-        return "Every 2 weeks"
-
-    return "Monthly"
 
 
 def normalize_probability(value):
@@ -414,125 +391,8 @@ def predict(
 
 
 @app.post("/assessments")
-def save_assessment(
-    data: dict = Body(...),
-):
-    try:
-        assessment_id = data.get(
-            "id",
-            new_assessment_id(),
-        )
-
-        student_id = data.get(
-            "student_id",
-            assessment_id,
-        )
-
-        student_name = data.get(
-            "student_name",
-            "Student",
-        )
-
-        risk = data.get(
-            "risk",
-            "LOW",
-        )
-
-        assessment = {
-            "id":
-                assessment_id,
-
-            "student_id":
-                student_id,
-
-            "student_name":
-                student_name,
-
-            "course":
-                data.get("course"),
-
-            "year":
-                data.get("year"),
-
-            "probability":
-                float(
-                    data.get(
-                        "probability",
-                        0,
-                    )
-                ),
-
-            "risk":
-                risk,
-
-            "status":
-                data.get(
-                    "status",
-                    get_status(risk),
-                ),
-
-            "monitoring":
-                data.get(
-                    "monitoring",
-                    get_monitoring_frequency(
-                        risk
-                    ),
-                ),
-
-            "risk_factors":
-                json.dumps(
-                    data.get(
-                        "risk_factors",
-                        [],
-                    )
-                ),
-
-            "interventions":
-                json.dumps(
-                    data.get(
-                        "interventions",
-                        [],
-                    )
-                ),
-
-            "student_data":
-                json.dumps(
-                    data.get(
-                        "student_data",
-                        {},
-                    )
-                ),
-
-            "created_at":
-                data.get(
-                    "created_at",
-                    datetime.now().isoformat(),
-                ),
-        }
-
-        insert_assessment(
-            assessment
-        )
-
-        return {
-            "message":
-                "Assessment saved successfully",
-
-            "id":
-                assessment_id,
-
-            "student_id":
-                student_id,
-        }
-
-    except Exception as error:
-        return {
-            "error":
-                "Could not save assessment.",
-
-            "detail":
-                str(error),
-        }
+def save_assessment(data: dict = Body(...)):
+    return create_assessment(data)
 
 
 @app.get("/assessments")
