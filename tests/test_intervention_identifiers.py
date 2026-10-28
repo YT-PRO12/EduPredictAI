@@ -16,7 +16,7 @@ class InterventionIdentifiersTest(unittest.TestCase):
 
     def test_ambiguous_or_duplicate_ids_preserve_existing_plan(self):
         before = database.get_student_interventions("synthetic")
-        for items in [[{"id": 1}, {"id": "01"}], [{"id": 1.5}], [{"id": True}], [{"id": 0}], [{"id": -1}], [{"id": 2**63}], [{"id": "1e2"}], [None]]:
+        for items in [[{"id": 1}, {"id": "01"}], [{"id": 1.5}], [{"id": True}], [{"id": 0}], [{"id": -1}], [{"id": 2**63}], [{"id": 2**53}], [{"id": "9007199254740992"}], [{}], [{"id": "1e2"}], [None]]:
             with self.subTest(items=items):
                 with self.assertRaises(ValueError):
                     database.save_student_interventions("synthetic", items)
@@ -25,3 +25,7 @@ class InterventionIdentifiersTest(unittest.TestCase):
     def test_integer_strings_and_distinct_ids_are_stored_exactly(self):
         database.save_student_interventions("synthetic", [{"id": "2"}, {"id": 3}])
         self.assertEqual({row["id"] for row in database.get_student_interventions("synthetic")}, {2, 3})
+
+    def test_largest_browser_safe_identifier_is_preserved(self):
+        database.save_student_interventions("synthetic", [{"id": "9007199254740991"}])
+        self.assertEqual(database.get_student_interventions("synthetic")[0]["id"], 9007199254740991)

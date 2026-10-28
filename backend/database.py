@@ -155,8 +155,8 @@ def intervention_identifier(value):
         raise ValueError("Intervention ID must be a positive integer")
     if isinstance(value, str) and re.fullmatch(r"[0-9]+", value):
         value = int(value)
-    if not isinstance(value, int) or not 1 <= value <= 9223372036854775807:
-        raise ValueError("Intervention ID must fit a positive SQLite integer")
+    if not isinstance(value, int) or not 1 <= value <= 9007199254740991:
+        raise ValueError("Intervention ID must fit a positive JavaScript-safe integer")
     return value
 
 
@@ -174,7 +174,7 @@ def save_student_interventions(
         for item in interventions:
             if not isinstance(item, dict):
                 raise ValueError("Each intervention must be an object")
-            identifiers.append(intervention_identifier(item["id"]))
+            identifiers.append(intervention_identifier(item.get("id")))
         if len(identifiers) != len(set(identifiers)):
             raise ValueError("Intervention IDs must be unique within a student's plan")
 

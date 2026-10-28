@@ -20,6 +20,8 @@ rows remain in history with different returned IDs. They also cover submissions
 without an ID. The route delegates to this service; these tests do not exercise
 the HTTP layer or prediction models.
 
-Intervention IDs must be distinct positive SQLite integers within a plan. Decimal
+Intervention IDs must be distinct positive JavaScript-safe integers (at most 2^53 - 1) within a plan. Decimal
 strings remain supported; booleans and fractional values are rejected. Invalid
 replacement plans retain the previous plan atomically.
+
+Intervention route-unit tests compile the actual handler in isolation with a test exception class, avoiding model imports and database startup. They verify validation failures raise status 422 and successful responses stay unchanged. These are not ASGI/HTTP integration tests. Existing legacy duplicate plans require deliberate data cleanup; concurrent full-plan replacement remains last-write-wins.
