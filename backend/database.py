@@ -1,4 +1,5 @@
 import sqlite3
+import re
 from contextlib import closing
 from pathlib import Path
 from datetime import datetime
@@ -149,6 +150,16 @@ def initialize_interventions_table():
 
 
 
+def intervention_identifier(value):
+    if isinstance(value, bool):
+        raise ValueError("Intervention ID must be a positive integer")
+    if isinstance(value, str) and re.fullmatch(r"[0-9]+", value):
+        value = int(value)
+    if not isinstance(value, int) or not 1 <= value <= 9223372036854775807:
+        raise ValueError("Intervention ID must fit a positive SQLite integer")
+    return value
+
+
 def save_student_interventions(
     student_id,
     interventions,
@@ -156,6 +167,16 @@ def save_student_interventions(
     # The connection context commits or rolls back; closing also releases locks.
     with closing(get_connection()) as connection, connection:
         cursor = connection.cursor()
+
+        if not isinstance(interventions, list):
+            raise ValueError("Interventions must be a list")
+        identifiers = []
+        for item in interventions:
+            if not isinstance(item, dict):
+                raise ValueError("Each intervention must be an object")
+            identifiers.append(intervention_identifier(item["id"]))
+        if len(identifiers) != len(set(identifiers)):
+            raise ValueError("Intervention IDs must be unique within a student's plan")
 
         cursor.execute(
             """
@@ -165,7 +186,7 @@ def save_student_interventions(
             (student_id,),
         )
 
-        for item in interventions:
+        for item, identifier in zip(interventions, identifiers):
             cursor.execute(
                 """
                 INSERT INTO interventions (
@@ -181,7 +202,7 @@ def save_student_interventions(
                 """,
                 (
                     student_id,
-                    int(item["id"]),
+                    identifier,
                     item.get("week"),
                     item.get("title"),
                     item.get("description"),

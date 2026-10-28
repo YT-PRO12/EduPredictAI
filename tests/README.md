@@ -19,3 +19,7 @@ regressions save two submissions with the same client ID and verify that both
 rows remain in history with different returned IDs. They also cover submissions
 without an ID. The route delegates to this service; these tests do not exercise
 the HTTP layer or prediction models.
+
+Intervention IDs must be distinct positive SQLite integers within a plan. Decimal
+strings remain supported; booleans and fractional values are rejected. Invalid
+replacement plans retain the previous plan atomically.
