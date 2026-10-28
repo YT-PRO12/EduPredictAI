@@ -28,7 +28,9 @@ unchanged. Retrying a creation request creates another assessment; this endpoint
 does not provide idempotent retries.
 
 Assessment probabilities must be finite percentages from 0 to 100. Invalid values
-are rejected before a row is written.
+are rejected before a row is written. Supplied student IDs and names must be
+nonblank strings, limited to 128 and 200 characters respectively. Valid supplied
+identities are retained exactly; omitted identities keep the existing defaults.
 
 ## 🎯 Problem Statement
 

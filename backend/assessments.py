@@ -38,6 +38,12 @@ def probability_percent(value):
     return probability
 
 
+def required_identity(value, field, maximum):
+    if not isinstance(value, str) or not value.strip() or len(value) > maximum:
+        raise ValueError(f"{field} must be a nonblank string of at most {maximum} characters")
+    return value
+
+
 def create_assessment(data: dict):
     try:
         assessment_id = new_assessment_id()
@@ -51,6 +57,9 @@ def create_assessment(data: dict):
             "student_name",
             "Student",
         )
+
+        student_id = required_identity(student_id, "Student ID", 128)
+        student_name = required_identity(student_name, "Student name", 200)
 
         risk = data.get(
             "risk",
