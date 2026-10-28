@@ -27,6 +27,9 @@ returned ID for subsequent references. Existing records and student IDs remain
 unchanged. Retrying a creation request creates another assessment; this endpoint
 does not provide idempotent retries.
 
+Assessment probabilities must be finite percentages from 0 to 100. Invalid values
+are rejected before a row is written.
+
 ## 🎯 Problem Statement
 
 Educational institutions often identify academically struggling students only after their performance has significantly declined.
