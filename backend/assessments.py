@@ -134,11 +134,11 @@ def create_assessment(data: dict):
                 student_id,
         }
 
-    except Exception as error:
+    except Exception:
         return {
             "error":
                 "Could not save assessment.",
 
             "detail":
-                str(error),
+                "Internal persistence error.",
         }
