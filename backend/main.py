@@ -375,7 +375,7 @@ def predict(
                 "Prediction failed.",
 
             "detail":
-                str(error),
+                "Internal prediction error.",
         }
 
 
