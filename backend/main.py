@@ -140,18 +140,6 @@ def get_risk_level(probability: float):
     return "LOW"
 
 
-def normalize_probability(value):
-    probability = float(value)
-
-    if probability > 1:
-        probability /= 100
-
-    return max(
-        0.0,
-        min(probability, 1.0),
-    )
-
-
 def normalize_risk_factors(factors):
     if not factors:
         return []
