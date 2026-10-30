@@ -54,7 +54,7 @@ def insert_assessment(data):
 
         cursor.execute(
             """
-            INSERT OR REPLACE INTO assessments (
+            INSERT INTO assessments (
                 id,
                 student_id,
                 student_name,
