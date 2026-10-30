@@ -1,6 +1,7 @@
 from datetime import datetime
 import json
 from backend.assessments import create_assessment, get_status, get_monitoring_frequency
+from backend.probability import normalize_probability
 
 from fastapi import FastAPI, Body
 from fastapi.middleware.cors import CORSMiddleware
