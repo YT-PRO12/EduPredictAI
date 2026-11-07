@@ -1,6 +1,7 @@
 """Assessment creation with server-owned identifiers, independent of ML startup."""
 from datetime import datetime
 import json
+import math
 
 from backend.database import insert_assessment
 from backend.identifiers import new_assessment_id
@@ -28,6 +29,21 @@ def get_monitoring_frequency(
     return "Monthly"
 
 
+def probability_percent(value):
+    if isinstance(value, bool):
+        raise ValueError("Probability must be a finite percentage from 0 to 100")
+    probability = float(value)
+    if not math.isfinite(probability) or not 0 <= probability <= 100:
+        raise ValueError("Probability must be a finite percentage from 0 to 100")
+    return probability
+
+
+def required_identity(value, field, maximum):
+    if not isinstance(value, str) or not value.strip() or len(value) > maximum:
+        raise ValueError(f"{field} must be a nonblank string of at most {maximum} characters")
+    return value
+
+
 def create_assessment(data: dict):
     try:
         assessment_id = new_assessment_id()
@@ -41,6 +57,9 @@ def create_assessment(data: dict):
             "student_name",
             "Student",
         )
+
+        student_id = required_identity(student_id, "Student ID", 128)
+        student_name = required_identity(student_name, "Student name", 200)
 
         risk = data.get(
             "risk",
@@ -64,7 +83,7 @@ def create_assessment(data: dict):
                 data.get("year"),
 
             "probability":
-                float(
+                probability_percent(
                     data.get(
                         "probability",
                         0,
