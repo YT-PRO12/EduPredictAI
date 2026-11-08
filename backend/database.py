@@ -45,6 +45,10 @@ def initialize_database():
             )
             """
         )
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_assessments_student_created "
+            "ON assessments(student_id, created_at, id)"
+        )
 
 
 
@@ -145,6 +149,10 @@ def initialize_interventions_table():
                 updated_at TEXT NOT NULL
             )
             """
+        )
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_interventions_student_week "
+            "ON interventions(student_id, week, id)"
         )
 
 
