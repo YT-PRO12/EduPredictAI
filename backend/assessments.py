@@ -1,6 +1,7 @@
 """Assessment creation with server-owned identifiers, independent of ML startup."""
 from datetime import datetime
 import json
+import math
 
 from backend.database import insert_assessment
 from backend.identifiers import new_assessment_id
@@ -118,6 +119,9 @@ def create_assessment(data: dict):
                     datetime.now().isoformat(),
                 ),
         }
+
+        if not math.isfinite(assessment["probability"]):
+            raise ValueError("Assessment probability must be finite")
 
         insert_assessment(
             assessment
