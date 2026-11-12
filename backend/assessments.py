@@ -94,7 +94,8 @@ def create_assessment(data: dict):
                     data.get(
                         "risk_factors",
                         [],
-                    )
+                    ),
+                    allow_nan=False,
                 ),
 
             "interventions":
@@ -102,7 +103,8 @@ def create_assessment(data: dict):
                     data.get(
                         "interventions",
                         [],
-                    )
+                    ),
+                    allow_nan=False,
                 ),
 
             "student_data":
@@ -110,7 +112,8 @@ def create_assessment(data: dict):
                     data.get(
                         "student_data",
                         {},
-                    )
+                    ),
+                    allow_nan=False,
                 ),
 
             "created_at":
