@@ -102,7 +102,7 @@ def get_all_assessments():
             """
             SELECT *
             FROM assessments
-            ORDER BY created_at DESC
+            ORDER BY created_at DESC, id DESC
             """
         )
 
@@ -121,7 +121,7 @@ def get_student_assessments(student_id):
             SELECT *
             FROM assessments
             WHERE student_id = ?
-            ORDER BY created_at ASC
+            ORDER BY created_at ASC, id ASC
             """,
             (student_id,),
         )
