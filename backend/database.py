@@ -219,7 +219,7 @@ def get_student_interventions(
                 updated_at
             FROM interventions
             WHERE student_id = ?
-            ORDER BY week ASC, id ASC
+            ORDER BY week ASC, interventions.id ASC
             """,
             (student_id,),
         )
