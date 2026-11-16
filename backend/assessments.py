@@ -123,10 +123,13 @@ def create_assessment(data: dict):
                 ),
         }
 
-        if not 0.0 <= assessment["probability"] <= 1.0 or not math.isfinite(
-            assessment["probability"]
+        # Preserve the existing API contract: fractional inputs (0..1) and
+        # legacy percentage-style inputs (1..100) are stored unchanged.
+        # Consumers must know the producer's scale before interpretation.
+        if not math.isfinite(assessment["probability"]) or not (
+            0.0 <= assessment["probability"] <= 100.0
         ):
-            raise ValueError("Assessment probability must be finite and within 0..1")
+            raise ValueError("Assessment score must be finite and within 0..100")
 
         insert_assessment(
             assessment
