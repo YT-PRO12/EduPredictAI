@@ -123,8 +123,10 @@ def create_assessment(data: dict):
                 ),
         }
 
-        if not math.isfinite(assessment["probability"]):
-            raise ValueError("Assessment probability must be finite")
+        if not 0.0 <= assessment["probability"] <= 1.0 or not math.isfinite(
+            assessment["probability"]
+        ):
+            raise ValueError("Assessment probability must be finite and within 0..1")
 
         insert_assessment(
             assessment
